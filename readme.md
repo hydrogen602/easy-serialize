@@ -7,7 +7,7 @@ Turn custom python objects into strings and vice-versa.
 
 - json
 - nested objects
-- no depencies outside of python's library (only pytest for developing)
+- no dependencies outside of python's library (only pytest for developing)
 
 ## Drawbacks
 
