@@ -1,5 +1,6 @@
 from typing import Dict, Literal
 import json
+import warnings
 
 class Serializable:
     __obj_register: Dict[str, type] = {}
@@ -29,5 +30,39 @@ class Serializable:
         if method == 'json':
             data = cls.__convert_to_json_dict(obj)
             return json.dumps(data, default=cls.__convert_to_json_dict)
+        else:
+            raise ValueError(f'Unknown method: "{method}"')
+
+    @classmethod
+    def __convert_from_json_dict(cls, obj: object, ignore_init_issue: bool = False) -> object:
+        if isinstance(obj, dict) and '_Serializable__class_id' in obj:
+            class_name = obj['_Serializable__class_id']
+            if class_name not in cls.__obj_register:
+                raise Exception(f'Class "{class_name}" is not deserializable')
+
+            class_ = cls.__obj_register[class_name]
+            del obj['_Serializable__class_id']
+
+            try:
+                # try creating the object with init
+                new_obj = class_()
+            except TypeError:
+                if not ignore_init_issue:
+                    warnings.warn(f'Class "{class_name}" couldn\'t be created using __init__ , thus it will be created without calling __init__. Consider allowing __init__ to take no arguments')
+                new_obj = class_.__new__(class_)
+
+            new_obj.__dict__ = obj # copy over all the data
+
+            return new_obj
+
+        return obj
+
+    @classmethod
+    def deserialize(cls, data: str, method: Literal['json'] = 'json', ignore_init_issue: bool = False) -> str:
+        if method == 'json':
+            def f(*args, **kwargs):
+                return cls.__convert_from_json_dict(*args, **kwargs, ignore_init_issue=ignore_init_issue)
+
+            return json.loads(data, object_hook=f)
         else:
             raise ValueError(f'Unknown method: "{method}"')
