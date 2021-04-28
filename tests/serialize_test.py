@@ -123,3 +123,45 @@ def test_7():
     # print(a_changed._A__y.data)
     # assert a._A__y == a_changed._A__y
     assert a == a_changed
+
+def test_8():
+    from easy_serialize.serialize import Serializable, make_serializable
+
+    @make_serializable
+    class B:
+        def __init__(self, data = None) -> None:
+            self.data = list(data)
+        def __eq__(self, o: object) -> bool:
+            return isinstance(o, B) and o.data == self.data
+
+    @make_serializable
+    class A:
+        def __init__(self, x, *args) -> None:
+            self.x = x
+            self.__y =  B(args)
+        def __eq__(self, o: object) -> bool:
+            return isinstance(o, A) and o.x == a.x and o.__y == self.__y
+    
+    a = A(3.14, 'hello', 'world')
+
+    s = Serializable.serialize(a)
+
+    a_changed = Serializable.deserialize(s, ignore_init_issue=True)
+
+    # assert a.x == a_changed.x
+    # print(a._A__y.data)
+    # print(a_changed._A__y.data)
+    # assert a._A__y == a_changed._A__y
+    assert a == a_changed
+
+def test_9():
+    from easy_serialize.serialize import Serializable, make_serializable
+
+    @make_serializable
+    class A:
+        pass
+
+    with pytest.raises(Exception):
+        @make_serializable
+        class A:
+            pass

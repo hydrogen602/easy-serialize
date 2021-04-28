@@ -1,8 +1,24 @@
-from typing import Dict, Literal
+from typing import Dict, Literal, TypeVar
 import json
 import warnings
 
+T = TypeVar('T')
+
+
+def make_serializable(cls: T) -> T:
+    '''
+    Marks the class as being serializable
+    '''
+    if not isinstance(cls, type):
+        raise TypeError(f'cls argument must be a class, got "{type(cls)}" instead')
+    Serializable._register_new_class(cls)
+    return cls
+
+
 class Serializable:
+    '''
+    Subclasses this class to make classes serializable
+    '''
     __obj_register: Dict[str, type] = {}
 
     def __init__(self, *args, **kwargs) -> None:
@@ -11,9 +27,14 @@ class Serializable:
         super().__init__(*args, **kwargs)
 
     def __init_subclass__(cls) -> None:
-        if cls.__qualname__ in Serializable.__obj_register:
-            raise Exception(f'A class with the name "{cls.__qualname__}" already exists')
-        Serializable.__obj_register[cls.__qualname__] = cls        
+        Serializable._register_new_class(cls)
+        super().__init_subclass__()    
+
+    @staticmethod
+    def _register_new_class(cls_to_add) -> None:
+        if cls_to_add.__qualname__ in Serializable.__obj_register and Serializable.__obj_register[cls_to_add.__qualname__] is not cls_to_add:
+            raise Exception(f'A class with the name "{cls_to_add.__qualname__}" already exists')
+        Serializable.__obj_register[cls_to_add.__qualname__] = cls_to_add
 
     @classmethod
     def __convert_to_json_dict(cls, obj: object) -> object:
