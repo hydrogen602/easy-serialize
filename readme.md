@@ -10,6 +10,7 @@ Turn custom python objects into strings and vice-versa.
 - supports nested objects
 - no dependencies outside of python's library (only pytest for developing)
 - ability to add methods to control serializing and deserializing
+- type hints and works with mypy
 
 ## Drawbacks
 
