@@ -64,3 +64,9 @@ class A:
     def deserialize(cls, data: dict) -> 'A':
         return A(data['x'])
 ```
+
+## Future
+
+Things to possibly add:
+- other data formats like xml or the like
+- support for objects with circular references

@@ -7,4 +7,5 @@ dist/
 build/
 
 # testing
+.pytest_cache
 tmp_test_pypi
