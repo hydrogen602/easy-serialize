@@ -1,2 +1,2 @@
 
-from .serialize import Serializable, make_serializable
+from .serialize import Serializable, make_serializable, serialize, deserialize

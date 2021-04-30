@@ -3,8 +3,9 @@ import pathlib
 import json
 import pytest
 
-p = pathlib.Path(sys.path[0]) / '..'
-sys.path.append(str(p))
+p = str(pathlib.Path(sys.path[0]) / '..')
+if p not in sys.path:
+    sys.path.append(p)
 del p
 
 def test_1():
@@ -17,18 +18,18 @@ def test_2():
         pass
 
 def test_3():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize
 
     class A(Serializable):
         pass
 
     a = A()
 
-    s = Serializable.serialize(a)
+    s = serialize(a)
     assert json.loads(s) == {'_Serializable__class_id': 'test_3.<locals>.A'}
 
 def test_4():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize
 
     class A(Serializable):
         
@@ -38,11 +39,11 @@ def test_4():
 
     a = A(5.3, [1, 'hi'])
 
-    s = Serializable.serialize(a)
+    s = serialize(a)
     assert json.loads(s) == {'_Serializable__class_id': 'test_4.<locals>.A', 'x': 5.3, '_A__y': [1, 'hi']}
 
 def test_5():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize
 
     class B(Serializable):
         def __init__(self) -> None:
@@ -55,11 +56,11 @@ def test_5():
 
     a = A(5.3)
 
-    s = Serializable.serialize(a)
+    s = serialize(a)
     assert json.loads(s) == {'_Serializable__class_id': 'test_5.<locals>.A', 'x': 5.3, '_A__y': {'_Serializable__class_id': 'test_5.<locals>.B', 'foo': 1}}
 
 def test_6():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize
 
     class B:
         def __init__(self) -> None:
@@ -71,13 +72,13 @@ def test_6():
             self.__y = B()
     
     with pytest.raises(Exception):
-        Serializable.serialize(A(5))
+        serialize(A(5))
     
     with pytest.raises(Exception):
-        Serializable.serialize(B())
+        serialize(B())
 
 def test_7():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize, deserialize
 
     class A(Serializable):
         def __init__(self, x, *args) -> None:
@@ -89,15 +90,15 @@ def test_7():
     
     a = A(3.14, 'hello', 'world')
 
-    s = Serializable.serialize(a)
+    s = serialize(a)
 
-    a_changed = Serializable.deserialize(s, ignore_init_issue=True)
+    a_changed = deserialize(s, ignore_init_issue=True)
 
     assert a == a_changed
 
 
 def test_7():
-    from easy_serialize.serialize import Serializable
+    from easy_serialize.serialize import Serializable, serialize, deserialize
 
     class B(Serializable):
         def __init__(self, data = None) -> None:
@@ -114,9 +115,9 @@ def test_7():
     
     a = A(3.14, 'hello', 'world')
 
-    s = Serializable.serialize(a)
+    s = serialize(a)
 
-    a_changed = Serializable.deserialize(s, ignore_init_issue=True)
+    a_changed = deserialize(s, ignore_init_issue=True)
 
     # assert a.x == a_changed.x
     # print(a._A__y.data)
@@ -125,7 +126,7 @@ def test_7():
     assert a == a_changed
 
 def test_8():
-    from easy_serialize.serialize import Serializable, make_serializable
+    from easy_serialize.serialize import Serializable, make_serializable, serialize, deserialize
 
     @make_serializable
     class B:
@@ -144,9 +145,11 @@ def test_8():
     
     a = A(3.14, 'hello', 'world')
 
-    s = Serializable.serialize(a)
+    # print('aaaaa > ', Serializable._Serializable__obj_register.get(type(a).__qualname__))
 
-    a_changed = Serializable.deserialize(s, ignore_init_issue=True)
+    s = serialize(a)
+
+    a_changed = deserialize(s, ignore_init_issue=True)
 
     # assert a.x == a_changed.x
     # print(a._A__y.data)
