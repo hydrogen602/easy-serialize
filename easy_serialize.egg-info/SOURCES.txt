@@ -1,0 +1,10 @@
+LICENSE
+pyproject.toml
+setup.cfg
+easy_serialize/__init__.py
+easy_serialize/py.typed
+easy_serialize/serialize.py
+easy_serialize.egg-info/PKG-INFO
+easy_serialize.egg-info/SOURCES.txt
+easy_serialize.egg-info/dependency_links.txt
+easy_serialize.egg-info/top_level.txt

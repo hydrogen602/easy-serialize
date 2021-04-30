@@ -3,8 +3,10 @@
 # python stuff
 **/__pycache__
 dist/
-**/*.egg-info
+**/*.egg-info/*
+!**/*.egg-info/SOURCES.txt
 build/
+init/
 
 # testing
 .pytest_cache
