@@ -1,6 +1,16 @@
 #!/bin/bash
 
-rm -r tmp_test_pypi || exit 1
+#
+# Test if the current version on PyPi works
+# it creates a new virtual environment,
+# downloads the package and pytest
+# and then runs pytest on the downloaded version
+#
+
+if [[ -d tmp_test_pypi ]]
+then
+    rm -r tmp_test_pypi || exit 1
+fi
 mkdir tmp_test_pypi || exit 1
 cd tmp_test_pypi || exit 1
 
@@ -14,5 +24,13 @@ then
 fi
 
 pip install easy-serialize
+pip install pytest
 
-python3 
+python -c "import easy_serialize" | exit 1
+
+cp -r ../tests .
+
+pytest tests
+
+cd ..
+rm -r tmp_test_pypi
