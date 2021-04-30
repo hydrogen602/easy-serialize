@@ -1,2 +1,6 @@
-**/__pycache__
 .vscode
+
+# python stuff
+**/__pycache__
+dist/
+**/*.egg-info
