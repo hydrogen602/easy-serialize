@@ -68,7 +68,7 @@ class A:
 ## Notes
 
 - `__init__` is by default not called for deserialized objects
-    - Because it needs to create the object and then copy over all the values of `__dict__`, it doesn't know the arguments used in `__init__`. Thus if the class requires arguments in `__init__`, the object will be created with `__new__` which avoids calling `__init__`. However, if `__init__` can take zero arguments, it will be called. A warning will be emitted if `__init__` is not called.
+    - Because it needs to create the object and then copy over all the values of `__dict__`, it doesn't know the arguments used in `__init__`. Thus the object will be created with `__new__` which avoids calling `__init__`.
 
 ## Future
 

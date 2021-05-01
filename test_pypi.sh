@@ -23,7 +23,7 @@ then
     exit 1
 fi
 
-pip install easy-serialize
+pip install easy-serialize --pre
 pip install pytest
 
 python -c "import easy_serialize" | exit 1
