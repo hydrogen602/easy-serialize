@@ -20,7 +20,6 @@ Turn custom python objects into strings and vice-versa.
 - if an object has references in many places, it will be present in the json repeatedly and after deserializing will be separate objects
 - Because of this, it cannot handle linked lists or similar interconnected data structures well
 - stores `__dict__` of the object, so classes using `__slots__` will likely require overriding the `serialize` method and `deserialize` classmethod.
-- Because it needs to create the object and then copy over all the values of `__dict__`, it doesn't know the arguments used in `__init__`. Thus if the class requires arguments in `__init__`, the object will be created with `__new__` which avoids calling `__init__`. However, if `__init__` can take zero arguments, it will be called. A warning will be emitted if `__init__` is not called.
 
 ## How to use
 
@@ -65,6 +64,11 @@ class A:
     def deserialize(cls, data: dict) -> 'A':
         return A(data['x'])
 ```
+
+## Notes
+
+- `__init__` is by default not called for deserialized objects
+    - Because it needs to create the object and then copy over all the values of `__dict__`, it doesn't know the arguments used in `__init__`. Thus if the class requires arguments in `__init__`, the object will be created with `__new__` which avoids calling `__init__`. However, if `__init__` can take zero arguments, it will be called. A warning will be emitted if `__init__` is not called.
 
 ## Future
 

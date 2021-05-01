@@ -85,7 +85,7 @@ def __convert_to_json_dict(obj: object) -> object:
     return data
 
 
-def __convert_from_json_dict(obj: object, ignore_init_issue: bool = False) -> object:
+def __convert_from_json_dict(obj: object) -> object:
     if isinstance(obj, dict) and '_Serializable__class_id' in obj:
         class_name = obj['_Serializable__class_id']
 
@@ -95,18 +95,12 @@ def __convert_from_json_dict(obj: object, ignore_init_issue: bool = False) -> ob
         del obj['_Serializable__class_id']
 
         if hasattr(class_, 'deserialize') and not __sameFunctions(class_.deserialize, Serializable.deserialize):
-            print(class_.deserialize, class_)
+            #print(class_.deserialize, class_)
             new_obj = class_.deserialize(obj)
             if not isinstance(new_obj, class_):
                 raise TypeError(f'Method "deserialize" of class "{class_.__qualname__}" should return an instance of itself, but instead returned "{type(new_obj)}"')
         else:
-            try:
-                # try creating the object with init
-                new_obj = class_()
-            except TypeError:
-                if not ignore_init_issue:
-                    warnings.warn(f'Class "{class_name}" couldn\'t be created using __init__ , thus it will be created without calling __init__. Consider allowing __init__ to take no arguments')
-                new_obj = class_.__new__(class_)
+            new_obj = class_.__new__(class_)
 
             new_obj.__dict__ = obj # copy over all the data
 
@@ -123,11 +117,8 @@ def serialize(obj: 'Serializable', method: Literal['json'] = 'json') -> str:
         raise ValueError(f'Unknown method: "{method}"')
 
 
-def deserialize(data: str, method: Literal['json'] = 'json', ignore_init_issue: bool = False) -> str:
+def deserialize(data: str, method: Literal['json'] = 'json') -> str:
     if method == 'json':
-        def f(*args, **kwargs):
-            return __convert_from_json_dict(*args, **kwargs, ignore_init_issue=ignore_init_issue)
-
-        return json.loads(data, object_hook=f)
+        return json.loads(data, object_hook=__convert_from_json_dict)
     else:
         raise ValueError(f'Unknown method: "{method}"')

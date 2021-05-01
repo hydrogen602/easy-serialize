@@ -117,7 +117,7 @@ def test_7():
 
     s = serialize(a)
 
-    a_changed = deserialize(s, ignore_init_issue=True)
+    a_changed = deserialize(s)
 
     # assert a.x == a_changed.x
     # print(a._A__y.data)
@@ -149,7 +149,7 @@ def test_8():
 
     s = serialize(a)
 
-    a_changed = deserialize(s, ignore_init_issue=True)
+    a_changed = deserialize(s)
 
     # assert a.x == a_changed.x
     # print(a._A__y.data)
