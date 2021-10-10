@@ -7,6 +7,7 @@ dist/
 !**/*.egg-info/SOURCES.txt
 build/
 init/
+.mypy_cache/
 
 # testing
 .pytest_cache

@@ -1,6 +1,6 @@
-from typing import Dict, Literal, Optional, TypeVar
+from typing import Dict, Optional, TypeVar
 import json
-import warnings
+# import warnings
 
 T = TypeVar('T')
 
@@ -10,7 +10,7 @@ def make_serializable(cls: T) -> T:
     Marks the class as being serializable
     '''
     if not isinstance(cls, type):
-        raise TypeError(f'cls argument must be a class, got "{type(cls)}" instead')
+        raise TypeError(f'argument must be a class, got "{type(cls)}" instead')
     Serializable._register_new_class(cls)
     return cls
 
@@ -34,7 +34,7 @@ class Serializable:
         '''
         if type(self) is Serializable:
             raise TypeError('Can\'t serialize "Serializable"')
-    
+
     @classmethod
     def deserialize(cls, data: dict) -> 'Serializable':
         '''
@@ -47,12 +47,13 @@ class Serializable:
 
     def __init_subclass__(cls) -> None:
         Serializable._register_new_class(cls)
-        super().__init_subclass__()    
+        super().__init_subclass__()
 
     @staticmethod
     def _register_new_class(cls_to_add) -> None:
-        if cls_to_add.__qualname__ in Serializable.__obj_register and Serializable.__obj_register[cls_to_add.__qualname__] is not cls_to_add:
-            raise Exception(f'A class with the name "{cls_to_add.__qualname__}" already exists')
+        if cls_to_add.__qualname__ in Serializable.__obj_register and \
+                Serializable.__obj_register[cls_to_add.__qualname__] is not cls_to_add:
+            raise ValueError(f'A class with the name "{cls_to_add.__qualname__}" already exists')
         Serializable.__obj_register[cls_to_add.__qualname__] = cls_to_add
 
     @staticmethod
@@ -65,19 +66,20 @@ def __sameFunctions(f, g):
     g = g.__func__ if hasattr(g, '__func__') else g
     return f is g
 
-    
+
 def __convert_to_json_dict(obj: object) -> object:
     class_name = type(obj).__qualname__
-    #print(class_name)
+    # print(class_name)
     if Serializable._get_class(class_name) is None:
-        #print(Serializable._get_class(class_name), Serializable._Serializable__obj_register[class_name])
-        raise Exception(f'Class "{class_name}" is not serializable')
-    
+        # print(Serializable._get_class(class_name), Serializable._Serializable__obj_register[class_name])
+        raise TypeError(f'Class "{class_name}" is not serializable')
+
     if hasattr(obj, 'serialize') and not __sameFunctions(obj.serialize, Serializable.serialize):
         data = obj.serialize()
         if not isinstance(data, dict):
-            raise TypeError(f'Method "serialize" of class "{type(obj).__qualname__}" should return a dict, but instead returned "{type(data)}"')
-    
+            msg = f'Method "serialize" of class "{type(obj).__qualname__}" should return a dict, but instead returned "{type(data)}"'
+            raise TypeError(msg)
+
     else:
         data = obj.__dict__.copy()
 
@@ -91,25 +93,25 @@ def __convert_from_json_dict(obj: object) -> object:
 
         class_ = Serializable._get_class(class_name)
         if class_ is None:
-            raise Exception(f'Class "{class_name}" is not deserializable')
+            raise TypeError(f'Class "{class_name}" is not deserializable')
         del obj['_Serializable__class_id']
 
         if hasattr(class_, 'deserialize') and not __sameFunctions(class_.deserialize, Serializable.deserialize):
-            #print(class_.deserialize, class_)
+            # print(class_.deserialize, class_)
             new_obj = class_.deserialize(obj)
             if not isinstance(new_obj, class_):
                 raise TypeError(f'Method "deserialize" of class "{class_.__qualname__}" should return an instance of itself, but instead returned "{type(new_obj)}"')
         else:
             new_obj = class_.__new__(class_)
 
-            new_obj.__dict__ = obj # copy over all the data
+            new_obj.__dict__ = obj  # copy over all the data
 
         return new_obj
 
     return obj
 
-    
-def serialize(obj: 'Serializable', method: Literal['json'] = 'json') -> str:
+
+def serialize(obj: 'Serializable', method: str = 'json') -> str:
     if method == 'json':
         data = __convert_to_json_dict(obj)
         return json.dumps(data, default=__convert_to_json_dict)
@@ -117,7 +119,7 @@ def serialize(obj: 'Serializable', method: Literal['json'] = 'json') -> str:
         raise ValueError(f'Unknown method: "{method}"')
 
 
-def deserialize(data: str, method: Literal['json'] = 'json') -> str:
+def deserialize(data: str, method: str = 'json') -> str:
     if method == 'json':
         return json.loads(data, object_hook=__convert_from_json_dict)
     else:

@@ -46,6 +46,10 @@ and deserialize using
 deserialize(stringified_object)
 ```
 
+### Example
+
+Refer to [Simple Example](demo.py)
+
 ### Custom serializing
 
 In the case that the standard method doesn't cut it, it is
